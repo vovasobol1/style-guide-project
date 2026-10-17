@@ -68,6 +68,7 @@ nav:
       - Оформление текста: rules/formatting.md
       - Markdown: rules/markdown.md
       - Описание API: rules/api.md
+      - Доступность текста: rules/accessibility.md
   - Словарь терминов: glossary.md
   - Шаблоны:
       - doc-templates/index.md
