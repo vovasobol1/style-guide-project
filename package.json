@@ -1,0 +1,13 @@
+{
+  "name": "style-guide-project",
+  "private": true,
+  "description": "Руководство по стилю документации КампусБук",
+  "scripts": {
+    "lint:md": "markdownlint-cli2",
+    "lint:style": "python3 scripts/stylecheck.py",
+    "lint": "npm run lint:md && npm run lint:style"
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "0.23.3"
+  }
+}
