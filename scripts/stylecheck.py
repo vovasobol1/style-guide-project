@@ -7,12 +7,13 @@
   ORF-03  дефис или двойной дефис вместо тире;
   ORF-04  склонение иноязычного названия через апостроф;
   TON-01  обращение «Вы» с прописной буквы в середине предложения;
+  MD-05   текст ссылки «здесь», «подробнее», «по ссылке» и подобный (ACC-03);
   слова из scripts/stop_words.txt (TON-05, TRM-03).
 
 Предупреждения (код возврата 0):
   TON-04  предложение длиннее MAX_SENTENCE_WORDS слов.
 
-Код, ссылки, HTML-комментарии, текст в «елочках» и участки между маркерами
+Код, адреса ссылок, HTML-комментарии, текст в «елочках» и участки между маркерами
 <!-- stylecheck: off --> и <!-- stylecheck: on --> не проверяются. Текст в «елочках»
 считается цитатой или упоминанием слова, а не текстом автора.
 
@@ -37,9 +38,12 @@ SKIP_LINE_RE = re.compile(r"^\s*(\|?\s*:?-{3,}|---\s*$|!!!|\?\?\?)")
 LIST_MARKER_RE = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+")
 HEADING_RE = re.compile(r"^\s*#{1,6}\s")
 
+COMMENT_RE = re.compile(r"<!--.*?-->")
+CODE_SPAN_RE = re.compile(r"(`+).+?\1")
+
 STRIP_PATTERNS = [
-    re.compile(r"<!--.*?-->"),
-    re.compile(r"(`+).+?\1"),
+    COMMENT_RE,
+    CODE_SPAN_RE,
     re.compile(r"\]\([^)]*\)"),
     re.compile(r"<https?://[^>]+>"),
     re.compile(r"https?://\S+"),
@@ -55,6 +59,9 @@ APOSTROPHE_RE = re.compile(r"[A-Za-z]+['’][а-яё]+")
 CAPITAL_YOU_RE = re.compile(r"(?<=[а-яёa-z0-9,;:] )(Вы|Вас|Вам|Вами|Ваш\w*)\b")
 SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?…])\s+(?=[«(\"A-ZА-ЯЁ0-9])")
 WORD_RE = re.compile(r"[A-Za-zА-Яа-яЁё0-9]+(?:-[A-Za-zА-Яа-яЁё0-9]+)*")
+LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]*\)")
+LINK_PUNCT_RE = re.compile(r"[*_.,:;!?…\s]+")
+VAGUE_LINK_TEXTS = {"здесь", "тут", "сюда", "подробнее", "далее", "ссылка", "по ссылке", "по этой ссылке"}
 
 
 def load_stop_words():
@@ -77,6 +84,17 @@ def clean(line):
     for pattern in STRIP_PATTERNS:
         line = pattern.sub(" ", line)
     return line
+
+
+def check_links(line):
+    """Ищет ссылки, текст которых не говорит, куда они ведут. Изображения не проверяются."""
+    line = CODE_SPAN_RE.sub(" ", COMMENT_RE.sub(" ", line))
+    errors = []
+    for match in LINK_RE.finditer(line):
+        text = LINK_PUNCT_RE.sub(" ", match.group(1)).strip().lower()
+        if text in VAGUE_LINK_TEXTS:
+            errors.append(("MD-05", f"текст ссылки «{match.group(1)}»: напишите, куда ведет ссылка"))
+    return errors
 
 
 def check_line(text, stop_words):
@@ -139,7 +157,7 @@ def check_file(path, stop_words):
             continue
 
         text = clean(LIST_MARKER_RE.sub("", raw))
-        for rule, message in check_line(text, stop_words):
+        for rule, message in check_links(raw) + check_line(text, stop_words):
             errors.append(f"{path}:{number}: {rule} {message}")
 
         if raw.lstrip().startswith("|") or HEADING_RE.match(raw):
