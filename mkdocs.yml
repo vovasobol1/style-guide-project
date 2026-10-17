@@ -1,0 +1,80 @@
+site_name: Руководство по стилю КампусБук
+site_description: Правила написания и оформления документации сервиса бронирования аудиторий КампусБук
+site_url: https://vovasobol1.github.io/style-guide-project/
+repo_url: https://github.com/vovasobol1/style-guide-project
+repo_name: vovasobol1/style-guide-project
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: ru
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - toc.follow
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Темная тема
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Светлая тема
+
+plugins:
+  - search:
+      lang: ru
+
+markdown_extensions:
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    anchors: warn
+    absolute_links: warn
+    unrecognized_links: warn
+
+nav:
+  - Главная: index.md
+  - Область применения: scope.md
+  - Правила:
+      - Стиль изложения: rules/voice.md
+      - Орфография и пунктуация: rules/spelling.md
+      - Оформление текста: rules/formatting.md
+      - Markdown: rules/markdown.md
+      - Описание API: rules/api.md
+  - Словарь терминов: glossary.md
+  - Шаблоны:
+      - doc-templates/index.md
+      - Статья справки: doc-templates/help-article.md
+      - Справочник метода API: doc-templates/api-method.md
+      - Список изменений: doc-templates/release-notes.md
+  - Проверка руководства:
+      - examples/index.md
+      - Забронировать аудиторию: examples/book-room.md
+      - Создать бронирование: examples/create-booking.md
